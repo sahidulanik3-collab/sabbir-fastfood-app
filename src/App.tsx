@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { SettingsProvider } from './context/SettingsContext';
 import { ToastProvider } from './context/ToastContext';
@@ -15,7 +15,17 @@ import { ReportsPage } from './pages/ReportsPage';
 import { DailyClosingPage } from './pages/DailyClosingPage';
 import { SettingsPage } from './pages/SettingsPage';
 
+import { ActivationScreen } from './components/security/ActivationScreen';
+import { isDeviceActivated } from './config/security';
+
 export const App: React.FC = () => {
+  const [isActivated, setIsActivated] = useState<boolean>(() => isDeviceActivated());
+
+  // Prevent access to all pages until device is activated with predefined password
+  if (!isActivated) {
+    return <ActivationScreen onActivate={() => setIsActivated(true)} />;
+  }
+
   return (
     <SettingsProvider>
       <ToastProvider>
