@@ -77,6 +77,8 @@ export const ReportsPage: React.FC = () => {
     [start, end]
   );
 
+  const allProducts = useLiveQuery(() => db.products.toArray(), []) || [];
+
   // Financial Calculations
   const totalSales = sales?.reduce((sum, s) => sum + s.payableAmount, 0) || 0;
   const totalCostOfGoods = saleItems?.reduce((sum, i) => sum + i.subtotalCost, 0) || 0;
@@ -98,13 +100,41 @@ export const ReportsPage: React.FC = () => {
   const grossProfit = totalSales - totalCostOfGoods;
   const netProfit = grossProfit - totalExpenses + totalOtherIncome;
 
-  // Product-wise sales summary for charts
-  const productStats: Record<string, { name: string; quantity: number; revenue: number }> = {};
+  // Product-wise sales summary with icon and details (same as Home page)
+  interface ItemStat {
+    id: string;
+    name: string;
+    nameBn?: string;
+    icon?: string;
+    image?: string;
+    quantity: number;
+    revenue: number;
+  }
+
+  const productStats: Record<string, ItemStat> = {};
+
+  // Seed with all available products so their icons & names match the Home page
+  allProducts.forEach((p) => {
+    productStats[p.id] = {
+      id: p.id,
+      name: p.name,
+      nameBn: p.nameBn,
+      icon: p.icon || '🍔',
+      image: p.image,
+      quantity: 0,
+      revenue: 0
+    };
+  });
+
+  // Accumulate sold items from sales in current period
   saleItems?.forEach((item) => {
     const key = item.productId;
     if (!productStats[key]) {
       productStats[key] = {
-        name: lang === 'bn' ? item.productNameBn || item.productName : item.productName,
+        id: key,
+        name: item.productName,
+        nameBn: item.productNameBn,
+        icon: '🍔',
         quantity: 0,
         revenue: 0
       };
@@ -112,7 +142,9 @@ export const ReportsPage: React.FC = () => {
     productStats[key].quantity += item.quantity;
     productStats[key].revenue += item.subtotalSelling;
   });
-  const topProducts = Object.values(productStats).sort((a, b) => b.quantity - a.quantity).slice(0, 7);
+
+  // Sort by highest quantity sold
+  const topProducts = Object.values(productStats).sort((a, b) => b.quantity - a.quantity);
 
   // Expense categories breakdown for charts
   const expenseCatStats: Record<string, number> = {};
@@ -351,29 +383,65 @@ export const ReportsPage: React.FC = () => {
 
       {/* Visual Analytics / Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Top Selling Products */}
+        {/* Food Items Sold Count Boxes (Diagram replaced with small item boxes matching home page) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <h3 className="text-xs font-bold text-slate-700 mb-3 flex items-center space-x-1.5">
-            <ShoppingBag className="w-4 h-4 text-emerald-600" />
-            <span>সর্বাধিক বিক্রীত খাবার (Top Selling Food Items)</span>
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+              <ShoppingBag className="w-4 h-4 text-emerald-600" />
+              <span>খাবার বিক্রয়ের সংখ্যা (Food Items Sold)</span>
+            </h3>
+            <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              মোট: {totalItemsSold} টি
+            </span>
+          </div>
 
           {topProducts.length === 0 ? (
-            <div className="text-center py-10 text-slate-400 text-xs">কোনো বিক্রয় নেই</div>
+            <div className="text-center py-10 text-slate-400 text-xs">কোনো খাবার পাওয়া যায়নি</div>
           ) : (
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topProducts} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    formatter={(val: any) => [`${val} টি`, 'বিক্রিত']}
-                    contentStyle={{ borderRadius: '12px', fontSize: '12px' }}
-                  />
-                  <Bar dataKey="quantity" fill="#059669" radius={[0, 6, 6, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 max-h-[350px] overflow-y-auto pr-1">
+              {topProducts.map((item) => (
+                <div
+                  key={item.id}
+                  className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
+                    item.quantity > 0
+                      ? 'bg-emerald-50/40 border-emerald-200'
+                      : 'bg-slate-50 border-slate-200/80 opacity-70'
+                  }`}
+                >
+                  {/* Left: Icon & Name */}
+                  <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1.5">
+                    <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0 shadow-2xs overflow-hidden">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{item.icon || '🍔'}</span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-xs text-slate-800 truncate">
+                        {lang === 'bn' ? item.nameBn || item.name : item.name}
+                      </h4>
+                      <span className="text-[10px] text-slate-500 font-medium block truncate">
+                        {formatBDT(item.revenue, lang)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Sold Count Badge */}
+                  <div className="shrink-0 text-right">
+                    <span
+                      className={`px-2 py-1 text-xs font-black rounded-lg border inline-block ${
+                        item.quantity > 0
+                          ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs'
+                          : 'bg-slate-200 text-slate-600 border-slate-300'
+                      }`}
+                    >
+                      {item.quantity} টি
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

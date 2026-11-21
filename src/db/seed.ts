@@ -2,9 +2,9 @@ import { db } from './index';
 import type { Product, Category, ExpenseCategory, ShopSettings } from './types';
 
 export const DEFAULT_SETTINGS: ShopSettings = {
-  shopName: 'Sabbir Fast Food',
-  shopNameBn: 'সাব্বির ফাস্ট ফুড',
-  ownerName: 'সাব্বির আহমেদ (Sabbir Ahmed)',
+  shopName: 'Manager POS',
+  shopNameBn: 'ম্যানেজার পিওএস',
+  ownerName: 'ম্যানেজার (Manager)',
   mobile: '01700000000',
   address: 'ঢাকা, বাংলাদেশ',
   currency: 'BDT',
@@ -146,6 +146,20 @@ export async function seedInitialDatabaseIfEmpty() {
     await db.settings.put({
       key: 'shop_settings',
       value: DEFAULT_SETTINGS
+    });
+  } else if (
+    settingsRecord.value.shopName === 'Sabbir Fast Food' ||
+    !settingsRecord.value.shopName ||
+    settingsRecord.value.shopNameBn?.includes('সাব্বির') ||
+    settingsRecord.value.shopNameBn?.includes('বোকাচোদা')
+  ) {
+    await db.settings.put({
+      key: 'shop_settings',
+      value: {
+        ...settingsRecord.value,
+        shopName: 'Manager POS',
+        shopNameBn: 'ম্যানেজার পিওএস'
+      }
     });
   }
 }

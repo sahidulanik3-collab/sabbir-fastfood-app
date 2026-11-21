@@ -3,8 +3,7 @@ const path = require('path');
 const zlib = require('zlib');
 
 // Create a valid uncompressed PNG buffer using pure Node.js (no native deps)
-function createPng(width, height, r, g, b) {
-  // A simple solid emerald image with rounded feel or bordered
+function createManagerPosIcon(width, height) {
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
   // IHDR chunk
@@ -23,30 +22,82 @@ function createPng(width, height, r, g, b) {
   const scanlineLength = 1 + width * 3;
   const rawData = Buffer.alloc(scanlineLength * height);
 
+  const cx = width / 2;
+  const cy = height / 2;
+  const cornerRadius = width * 0.22;
+
   for (let y = 0; y < height; y++) {
     const rowOffset = y * scanlineLength;
     rawData[rowOffset] = 0; // No filter
 
     for (let x = 0; x < width; x++) {
       const pixelOffset = rowOffset + 1 + x * 3;
-      
-      // Let's create an emerald background with a gold burger center accent
-      const dx = x - width / 2;
-      const dy = y - height / 2;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const radius = width * 0.35;
 
-      if (dist < radius) {
-        // Gold / Orange burger center
-        rawData[pixelOffset] = 245;     // R
-        rawData[pixelOffset + 1] = 158; // G
-        rawData[pixelOffset + 2] = 11;  // B
-      } else {
-        // Emerald brand color
-        rawData[pixelOffset] = r;
-        rawData[pixelOffset + 1] = g;
-        rawData[pixelOffset + 2] = b;
+      // Base: Emerald Gradient (#059669 to #047857)
+      const gradT = y / height;
+      let r = Math.round(5 + (4 - 5) * gradT);
+      let g = Math.round(150 + (120 - 150) * gradT);
+      let b = Math.round(105 + (87 - 105) * gradT);
+
+      // Check distance from center for modern rounded squircle / circle icon
+      const dx = Math.abs(x - cx);
+      const dy = Math.abs(y - cy);
+      const halfW = width * 0.44;
+      const halfH = height * 0.44;
+
+      // Inner POS Terminal Screen Box (Slate #0f172a)
+      const isScreen =
+        x >= width * 0.22 &&
+        x <= width * 0.78 &&
+        y >= height * 0.24 &&
+        y <= height * 0.72;
+
+      // Gold Terminal Base & Stand
+      const isBase =
+        x >= width * 0.32 &&
+        x <= width * 0.68 &&
+        y >= height * 0.74 &&
+        y <= height * 0.82;
+
+      // Golden "M" POS emblem in center
+      const inMEmblem =
+        y >= height * 0.34 &&
+        y <= height * 0.62 &&
+        (
+          (Math.abs(x - width * 0.32) < width * 0.035) || // Left bar of M
+          (Math.abs(x - width * 0.68) < width * 0.035) || // Right bar of M
+          // Diagonal strokes of M meeting in center
+          (y >= height * 0.36 && Math.abs((y - height * 0.36) - Math.abs(x - cx) * 1.5) < width * 0.04 && x >= width * 0.32 && x <= width * 0.68)
+        );
+
+      // Status LED circle
+      const isLed = Math.sqrt(Math.pow(x - width * 0.70, 2) + Math.pow(y - height * 0.30, 2)) < width * 0.025;
+
+      if (inMEmblem) {
+        // Gold / Amber (#fbbf24)
+        r = 251;
+        g = 191;
+        b = 36;
+      } else if (isLed) {
+        // Bright Green LED
+        r = 34;
+        g = 197;
+        b = 94;
+      } else if (isBase) {
+        // Amber Stand
+        r = 245;
+        g = 158;
+        b = 11;
+      } else if (isScreen) {
+        // Dark Slate Screen (#1e293b)
+        r = 30;
+        g = 41;
+        b = 59;
       }
+
+      rawData[pixelOffset] = r;
+      rawData[pixelOffset + 1] = g;
+      rawData[pixelOffset + 2] = b;
     }
   }
 
@@ -86,8 +137,8 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Generate PWA icons in emerald #059669 (5, 150, 105)
-fs.writeFileSync(path.join(publicDir, 'pwa-192x192.png'), createPng(192, 192, 5, 150, 105));
-fs.writeFileSync(path.join(publicDir, 'pwa-512x512.png'), createPng(512, 512, 5, 150, 105));
-fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), createPng(180, 180, 5, 150, 105));
-console.log('PWA PNG icons created successfully.');
+// Generate PWA PNG icons for Manager POS
+fs.writeFileSync(path.join(publicDir, 'pwa-192x192.png'), createManagerPosIcon(192, 192));
+fs.writeFileSync(path.join(publicDir, 'pwa-512x512.png'), createManagerPosIcon(512, 512));
+fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), createManagerPosIcon(180, 180));
+console.log('Manager POS high-quality PNG icons generated.');

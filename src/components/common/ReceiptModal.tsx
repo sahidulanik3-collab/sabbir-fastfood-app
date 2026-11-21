@@ -137,7 +137,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, sal
           {/* Footer Note */}
           <div className="text-center text-[11px] text-slate-500 border-t border-slate-200 pt-2">
             <div>ধন্যবাদ! আবার আসবেন।</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Powered by Sabbir POS (Offline)</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Powered by Manager POS (Offline)</div>
           </div>
         </div>
 

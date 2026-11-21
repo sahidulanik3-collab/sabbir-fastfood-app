@@ -48,11 +48,11 @@ export const ActivationScreen: React.FC<ActivationScreenProps> = ({ onActivate }
         {/* Header Banner */}
         <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6 sm:p-8 text-center relative">
           <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center text-3xl shadow-inner mb-3">
-            🍔
+            🏪
           </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight">সাব্বির ফাস্ট ফুড পিওএস</h1>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight">Manager POS</h1>
           <p className="text-xs text-emerald-100 font-medium mt-1">
-            ডিভাইস অ্যাক্টিভেশন (One-Time Activation)
+            ম্যানেজার পিওএস অ্যাক্টিভেশন (Device Activation)
           </p>
         </div>
 

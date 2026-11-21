@@ -138,7 +138,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose })
 
         {/* Drawer Footer */}
         <div className="p-3 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 text-center space-y-1">
-          <div className="font-semibold text-slate-700">Sabbir Fast Food POS v1.0</div>
+          <div className="font-semibold text-slate-700">Manager POS v1.0</div>
           <div>No Cloud • No API • 100% Offline</div>
         </div>
       </aside>

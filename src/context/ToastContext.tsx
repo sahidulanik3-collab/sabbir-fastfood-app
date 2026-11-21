@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { sound } from '../utils/sound';
+import { CheckCircle2 } from 'lucide-react';
 
 export interface ToastAction {
   label: string;
@@ -13,6 +14,7 @@ export interface ToastMessage {
   message?: string;
   action?: ToastAction;
   duration?: number;
+  isSaleToast?: boolean;
 }
 
 interface ToastContextType {
@@ -37,11 +39,25 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const showToast = useCallback(
-    ({ type, title, message, action, duration = 3500 }: Omit<ToastMessage, 'id'>) => {
+    ({ type, title, message, action, duration = 3000, isSaleToast = false }: Omit<ToastMessage, 'id'>) => {
       const id = crypto.randomUUID();
-      const newToast: ToastMessage = { id, type, title, message, action, duration };
+      const newToast: ToastMessage = { id, type, title, message, action, duration, isSaleToast };
 
-      setToasts((prev) => [...prev.slice(-3), newToast]); // keep max 4 toasts
+      setToasts((prev) => {
+        // If this is a fast sale toast, replace any existing sale toast so they overlap in the exact same spot!
+        if (isSaleToast) {
+          prev.forEach((t) => {
+            if (t.isSaleToast && timersRef.current.has(t.id)) {
+              clearTimeout(timersRef.current.get(t.id));
+              timersRef.current.delete(t.id);
+            }
+          });
+          const filtered = prev.filter((t) => !t.isSaleToast);
+          return [...filtered, newToast];
+        }
+        // General toast: keep max 2
+        return [...prev.slice(-1), newToast];
+      });
 
       if (duration > 0) {
         const timer = setTimeout(() => {
@@ -61,8 +77,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return showToast({
         type: 'success',
         title: `${productName} বিক্রি সম্পন্ন (${amountText})`,
-        message: onUndo ? 'ভুল হলে বাতিল করতে "আনডু" চাপুন' : undefined,
-        duration: 5000,
+        duration: 3000, // Exactly 3 seconds as requested
+        isSaleToast: true,
         action: onUndo
           ? {
               label: 'আনডু / Undo',
@@ -80,41 +96,41 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ toasts, showToast, showSaleSuccess, removeToast }}>
       {children}
-      {/* Toast Overlay Container */}
-      <div className="fixed bottom-20 left-0 right-0 z-50 flex flex-col items-center px-4 pointer-events-none space-y-2">
+      {/* Toast Overlay Container - Slim, single line floating pill right above bottom nav */}
+      <div className="fixed bottom-16 sm:bottom-20 left-0 right-0 z-50 flex flex-col items-center px-3 pointer-events-none space-y-1.5">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-center justify-between w-full max-w-md p-3.5 rounded-xl shadow-xl border text-sm transition-all duration-300 transform animate-in fade-in slide-in-from-bottom-3 ${
+            className={`pointer-events-auto flex items-center justify-between w-full max-w-sm py-2 px-3.5 rounded-full shadow-lg border text-xs transition-all duration-200 transform animate-in fade-in slide-in-from-bottom-2 ${
               t.type === 'success'
-                ? 'bg-emerald-900/95 text-white border-emerald-700 shadow-emerald-950/20'
+                ? 'bg-emerald-900/95 text-white border-emerald-600/80 shadow-emerald-950/30'
                 : t.type === 'error'
-                ? 'bg-rose-900/95 text-white border-rose-700 shadow-rose-950/20'
+                ? 'bg-rose-900/95 text-white border-rose-600/80 shadow-rose-950/30'
                 : t.type === 'warning'
-                ? 'bg-amber-900/95 text-white border-amber-700 shadow-amber-950/20'
-                : 'bg-slate-900/95 text-white border-slate-700 shadow-slate-950/20'
+                ? 'bg-amber-900/95 text-white border-amber-600/80 shadow-amber-950/30'
+                : 'bg-slate-900/95 text-white border-slate-700 shadow-slate-950/30'
             }`}
           >
-            <div className="flex-1 mr-2 min-w-0">
+            <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <div className="font-semibold truncate">{t.title}</div>
-              {t.message && <div className="text-xs text-white/80 mt-0.5">{t.message}</div>}
             </div>
 
-            <div className="flex items-center space-x-2 shrink-0">
+            <div className="flex items-center space-x-1.5 shrink-0">
               {t.action && (
                 <button
                   onClick={() => {
                     t.action?.onClick();
                     removeToast(t.id);
                   }}
-                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-400 text-slate-900 hover:bg-amber-300 active:scale-95 transition-all shadow-sm"
+                  className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-amber-400 text-slate-950 hover:bg-amber-300 active:scale-95 transition-all shadow-xs"
                 >
                   {t.action.label}
                 </button>
               )}
               <button
                 onClick={() => removeToast(t.id)}
-                className="text-white/60 hover:text-white p-1 rounded-md"
+                className="text-white/60 hover:text-white p-1 rounded-full leading-none text-xs ml-1"
                 aria-label="Close"
               >
                 ✕

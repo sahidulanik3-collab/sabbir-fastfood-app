@@ -25,9 +25,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'সাব্বির ফাস্ট ফুড - Sabbir Fast Food POS',
-        short_name: 'Sabbir POS',
-        description: '100% Offline Fast Food Shop Management & POS for Bangladesh',
+        name: 'Manager POS - Offline Shop Management',
+        short_name: 'Manager POS',
+        description: '100% Offline Fast Food & Shop Management POS for Android',
         theme_color: '#059669',
         background_color: '#f8fafc',
         display: 'standalone',
