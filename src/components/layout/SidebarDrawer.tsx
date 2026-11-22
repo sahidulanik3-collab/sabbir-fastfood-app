@@ -63,8 +63,8 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose })
         {/* Drawer Header */}
         <div className="p-4 bg-emerald-700 text-white flex items-center justify-between border-b border-emerald-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-lg border border-white/20">
-              🍔
+            <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 overflow-hidden p-0.5 shadow-xs">
+              <img src="./logo.png" alt="Manager POS" className="w-full h-full object-contain rounded-lg" />
             </div>
             <div>
               <h2 className="font-bold text-base leading-tight">

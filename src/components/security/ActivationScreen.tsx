@@ -47,8 +47,8 @@ export const ActivationScreen: React.FC<ActivationScreenProps> = ({ onActivate }
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 transition-all">
         {/* Header Banner */}
         <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6 sm:p-8 text-center relative">
-          <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center text-3xl shadow-inner mb-3">
-            🏪
+          <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center shadow-inner mb-3 overflow-hidden p-1">
+            <img src="./logo.png" alt="Manager POS" className="w-full h-full object-contain rounded-xl" />
           </div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight">Manager POS</h1>
           <p className="text-xs text-emerald-100 font-medium mt-1">

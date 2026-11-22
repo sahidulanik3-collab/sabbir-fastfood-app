@@ -27,6 +27,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleDrawer }) => {
             )}
           </button>
 
+          <img
+            src="./logo.png"
+            alt="Manager POS Logo"
+            className="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5 border border-white/20 shadow-xs shrink-0"
+          />
+
           <div>
             <h1 className="font-bold text-base leading-tight tracking-tight flex items-center space-x-1.5">
               <span>{lang === 'bn' ? settings.shopNameBn : settings.shopName}</span>
